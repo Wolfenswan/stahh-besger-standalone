@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+
+{% block title %}
+    StaHH_BesGer - Staatsarchiv Hamburg Bestellschein Generator
+{% endblock %}
+
+{% block content %}
+    <div class="container">
+        <div class="row">
+            <div class="col-5">
+                <h1>Staatsarchiv Hamburg Bestellschein Generator</h1>
+                <form action="" method="post">
+                        {{ form.hidden_tag() }}
+                        <div class="form-group">
+                            {{ form.name.label }}<br>
+                            {{ form.name(size=32,class='form-control') }}
+                            {% for error in form.name.errors %}
+                                <div class=".alert-danger">[{{ error }}]</div>
+                            {% endfor %}
+                        </div>
+                        <div class="form-group">
+                            {{ form.datum.label }}<br>
+                            {{ form.datum(class='form-control') }}
+                            {% for error in form.datum.errors %}
+                                <div class=".alert-danger">[{{ error }}]</div>
+                            {% endfor %}
+                        </div>
+                        <div class="form-group">
+                            {{ form.signaturen.label }}  - Eine Signatur pro Zeile<br>
+                            {{ form.signaturen(rows='10',cols='30',class='form-control') }}
+                            {% for error in form.signaturen.errors %}
+                                <div class=".alert-danger">[{{ error }}]</div>
+                            {% endfor %}
+                        </div>
+                        <div class="form-group">
+                            {{ form.delete_after_dl }} {{ form.delete_after_dl.description }}<br/>
+                            {{ form.legacy_dl }} {{ form.legacy_dl.description }}
+                        </div>
+                        <p>{{ form.submit(class='btn btn-primary') }}</p>
+                        {{ form.csrf_token }}
+                </form>
+            </div>
+            <div class="col-5">
+            <h3>Anmerkungen</h3>
+            <p>Der Generator erstellt einzelne PDFs für jede Signatur, die dann in einer ZIP-Datei bereit gestellt werden.</p>
+                <p>In den Standard-Einstellungen werden PDFs sowie ZIP nach Klick auf den Download gelöscht. Wird diese Einstellungen deaktiviert, bleiben die Dateien auf dem Server.</p>
+                <p>Die alte Download-Methode steht testweise zur Verfügung, falls die aktuelle Version fehlschlagen sollte.</p>
+            </div>
+        </div>
+    </div>
+{% endblock %}
