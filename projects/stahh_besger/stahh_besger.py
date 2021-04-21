@@ -60,26 +60,26 @@ def parse_signatures(sig_data):
 def write_order_pdf(output_folder, data):
 	'''
 	Creates a copy of the provided template pdf, filling in all form fields with the data
-	Credits to https://bostata.com/how-to-populate-fillable-pdfs-with-python/
+	See https://bostata.com/how-to-populate-fillable-pdfs-with-python/ for a lot of background information
 	'''
 
-	template_pdf = pdfrw.PdfReader(Constants.TEMPLATE_PDF) # todo; shouldn't this also work with url_for?
+	template_pdf = pdfrw.PdfReader(Constants.TEMPLATE_PDF)
 	pdf_name = f'Bestellschein {data[Constants.NAME_KEY]} {data[Constants.DATE_KEY]} {data[Constants.ID1_KEY]}_{data[Constants.ID2_KEY].replace("/","")}'
-	new_pdf_path = output_folder / f'{pdf_name}.pdf' # todo use Path
+	new_pdf_path = output_folder / f'{pdf_name}.pdf'
 
-	annot_key = '/Annots'
+	# The interactive field inside a pdf are indicated by these /Keys
+	annot_key = '/Annots' 
 	annot_field_Key = '/T'
-	# annot_val_keY = '/V'
-	# annot_rect_key = '/Rect'
 	subtype_key = '/Subtype'
 	widget_subtype_key = '/Widget'
 
+	# Collect all annotations in a simple array, then filter the annotation-fields we want using the passed data
 	annotations = [annotation for annotation in template_pdf.pages[0][annot_key] if
 				   annotation[subtype_key] == widget_subtype_key and annotation[annot_field_Key]]
 	for a in annotations:
 		key = a[annot_field_Key][1:-1]
 		if key in data.keys():
-			a.update(pdfrw.PdfDict(V=data[key]))
+			a.update(pdfrw.PdfDict(V=data[key])) # Write the intended data to the relevant fields
 
 	pdfrw.PdfWriter().write(new_pdf_path, template_pdf)
 	return pdf_name
@@ -87,7 +87,7 @@ def write_order_pdf(output_folder, data):
 def process_form_data(form):
 	name = form.name.data
 	datum = form.datum.data.strftime('%d.%m.%Y')
-	sig_data = form.signaturen.data.split('\r\n') if form.signaturen.data != "" else [] # if/else to avoid a list containing only [""]
+	sig_data = form.signaturen.data.split('\r\n') if form.signaturen.data != "" else [] # if/else to avoid an empty list containing only [""]
 	url_data = form.urls.data.split('\r\n') if form.urls.data != "" else []
 
 	return name,datum,sig_data,url_data

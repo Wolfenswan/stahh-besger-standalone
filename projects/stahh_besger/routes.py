@@ -19,7 +19,7 @@ def stahh_besger_form(debug=False, mk_zip=True):
         name, datum, sig_data, url_data = process_form_data(form) # extract strings and lists from submitted form
 
         order_dir = Path(f"{Constants.OUTPUT_DIR}/{name}_{datum}")
-        if not order_dir.exists(): # todo check permissions
+        if not order_dir.exists(): # In theory a permissions check would be in order or a try / except but given the app's scope this is perfectly feasible
             Path.mkdir(order_dir)
 
         if debug:
@@ -35,20 +35,17 @@ def stahh_besger_form(debug=False, mk_zip=True):
             if debug:
                 flash(f'"{pdf_name}.pdf" erstellt')
 
-        #if form.zip_file.data:
         if mk_zip:
             zip_path = Path(f'{order_dir}/{name}_{datum}.zip')
             if debug:
                 flash(f'ZIP: {zip_path}')
             create_zip(zip_path, order_dir)
-            # todo: https://medium.com/analytics-vidhya/receive-or-return-files-flask-api-8389d42b0684 (Improve)
-            #dl_url = url_for('.download_file', folder=f'{order_dir}',zip_name=f'{name}_{datum}.zip') # dl url needs to be provide a relative path
+            # Possible improvement documented here: https://medium.com/analytics-vidhya/receive-or-return-files-flask-api-8389d42b0684 (Improve)
             dl_url = url_for('.download_file', order = f'{name}_{datum}')
-            #folder=f'{order_dir}',zip_name=f'{name}_{datum}.zip') # dl url needs to be provide a relative path
             if debug:
                 flash(dl_url)
             message = Markup(f"<a href='{dl_url}?del={form.delete_after_dl.data}&leg={form.legacy_dl.data}'>ZIP herunterladen</a>")
-            flash(message)
+            flash(message) # Not the fanciest way to display the download but it works and I don't have to deal with (de)activating buttons using css or javascript.
 
     return render_template("stahh_besger/form.html", form=form)
 
@@ -66,7 +63,6 @@ def download_file(order):
         if cleanup == 'True': # cleanup does not work with legacy method
             shutil.rmtree(folder)
         return Response(stream_data, mimetype='application/zip', direct_passthrough=True) # required workaround as per https://help.pythonanywhere.com/pages/FlaskSendFileBytesIO/
-        #return send_file(stream_data, mimetype='application/zip', as_attachment=True, attachment_filename=zip)
 
 @stahh_besger_bp.route('/stahh_besger/dryrun')
 def dryrun():
